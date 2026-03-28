@@ -498,11 +498,7 @@ window.onload = () => {
 
     } else {
         welcome.style.display = 'flex';
-
-        setTimeout(() => {
-            welcome.classList.add('show');
-        }, 100);
-
+       welcome.classList.add('show');
         switchTab('login');
     }
 };
@@ -545,8 +541,10 @@ function switchTab(tab){
     }
 
     // clear message
+if(tab !== 'login'){
     document.getElementById('loginMessage').textContent='';
 }
+    }
 function openProfilePopup(){
     const user = sessionStorage.getItem('loggedInUser');
     document.getElementById('popupUsername').textContent = user;
@@ -591,39 +589,66 @@ function changeUsername(){
 }
 
 // Forgot password function
-function recoverPassword(){
+function recoverPassword() {
     const username = document.getElementById('forgotUsername').value.trim();
     const msg = document.getElementById('loginMessage');
-    if(!username){
+
+    if (!username) {
         msg.textContent = "❌ Enter your username";
         return;
     }
+
     const storedPass = localStorage.getItem(username);
-    if(storedPass){
-        msg.textContent = `🔑 Your password is: ${atob(storedPass)}`;
+
+    if (storedPass) {
+        msg.innerHTML = `
+            🔑 Your password is: ${atob(storedPass)} <br><br>
+            <button onclick="goToLogin('${username}')">⬅ Go to Login</button>
+        `;
     } else {
         msg.textContent = "❌ User not found";
     }
 }
 
+// Helper to switch tab and prefill username
+function goToLogin(username) {
+    switchTab('login');
+    document.getElementById('loginUsername').value = username;
+    document.getElementById('loginMessage').textContent = '';
+}
+
+
 // On page load, show login by default
-function signup(){
+function signup() {
     const username = document.getElementById('signupUsername').value.trim();
     const password = document.getElementById('signupPassword').value.trim();
     const msg = document.getElementById('loginMessage');
 
-    if(!username || !password){
+    if (!username || !password) {
         msg.textContent = "❌ Enter username & password";
         return;
     }
 
-    if(localStorage.getItem(username)){
+    if (localStorage.getItem(username)) {
         msg.textContent = "⚠️ User already exists";
         return;
     }
 
-    localStorage.setItem(username, btoa(password)); // encoded
-    msg.textContent = "✅ Account created! Please login.";
+    localStorage.setItem(username, btoa(password)); // encode password
+
+    // Instead of switching to login immediately, show a "Go to Login" button
+    msg.innerHTML = `✅ Account created! 
+                     <button onclick="goToLoginFromSignup()">Go to Login</button>`;
+
+    // Optionally clear signup fields
+    document.getElementById('signupUsername').value = '';
+    document.getElementById('signupPassword').value = '';
+}
+
+// Helper to go to login tab
+function goToLoginFromSignup() {
+    switchTab('login'); // show login form
+    document.getElementById('loginMessage').textContent = ''; // clear messages
 }
 
 function login(){
