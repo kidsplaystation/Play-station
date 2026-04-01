@@ -165,7 +165,70 @@ footer {
     border-radius: 10px;
     white-space: pre-line; /* keeps line breaks from JS */
 }
+/* TO-DO CONTAINER */
+#taskList {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+}
 
+/* TASK CARD */
+#taskList li {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    margin: 10px 0;
+    padding: 12px 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #fff;
+    transition: 0.3s;
+}
+
+/* HOVER EFFECT */
+#taskList li:hover {
+    transform: scale(1.02);
+    background: rgba(255,255,255,0.15);
+}
+
+/* CHECKBOX */
+#taskList input[type="checkbox"] {
+    margin-right: 10px;
+    transform: scale(1.2);
+}
+
+/* DELETE BUTTON */
+#taskList button {
+    background: #ff4d4d;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#taskList button:hover {
+    background: #ff1a1a;
+}
+h3 {
+    color: #fff;
+    margin-bottom: 5px;
+}
+#weatherChart {
+  margin-top: 20px;
+  background: transparent;
+  border-radius: 12px;
+  padding: 10px;
+  width: 100%;
+  max-width: 400px;
+}
+/* EMPTY MESSAGE */
+#emptyMsg {
+    color: #aaa;
+    font-size: 14px;
+}
 /* Bubbles container behind content */
 #bubbles {
     position: fixed;
@@ -245,18 +308,70 @@ footer {
     background: #ff0055;
     color: white;
 }
+#forecast {
+    display: flex;
+    overflow-x: auto;
+    margin-top: 15px;
+}
+
+.day-card {
+    min-width: 80px;
+    margin-right: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.1);
+    text-align: center;
+}
+#drawing canvas {
+    cursor: crosshair;
+}
+#drawing button {
+    margin: 5px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 8px;
+    background: #00ffff;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+#drawing button:hover {
+    background: #ffcc00;
+}
+/* LIGHT MODE */
+.light-mode {
+    background: #f5f5f5;
+    color: #000;
+}
+
+.light-mode nav {
+    background: rgba(255,255,255,0.9);
+}
+
+.light-mode button {
+    background: #ddd;
+    color: #000;
+}
+
+.light-mode .section {
+    background: #fff;
+    color: #000;
+}
 </style>
 </head>
 <body>
 <!-- ---------------- NAVIGATION ---------------- -->
 <nav>
 <button onclick="showSection('games')">Games</button>
+<button onclick="showSection('drawing')">🎨 Drawing Board</button>
 <button onclick="showSection('marketing')">Marketing</button>
 <button onclick="showSection('scraper')">🌐 Scraper</button>
 <button onclick="showSection('calendar')">📅 Calendar</button>
 <button onclick="showSection('todo')">📝 To Do</button>
 <button onclick="showSection('weather')">🌦 Weather</button>
 <button onclick="logoutWithConfirm()">Logout</button>
+<button onclick="toggleTheme()">🌙 Theme</button>
 <button onclick="showSection('profile')">👤 Profile</button>
 <span id="userDisplay" style="color:#ffcc00;margin-left:15px;"></span>
 </nav>
@@ -307,54 +422,104 @@ footer {
     </div>
 </div>
 
+
+
 <div id="mainContent">
-<!-- ---------------- GAMES HUB ---------------- -->
-<div id="games" class="section">
-<h2>🎮 Games Hub</h2>
-<p style="text-align:center;">
-🏆 Best MC Score: <span id="bestMC">0</span> |
-🏆 Best TF Score: <span id="bestTF">0</span>
-</p>
+  <!-- ---------------- GAMES HUB ---------------- -->
+  <div id="games" class="section">
+    <h2>🎮 Games Hub</h2>
+    <p style="text-align:center;">
+      🏆 Best MC Score: <span id="bestMC">0</span> |
+      🏆 Best TF Score: <span id="bestTF">0</span>
+    </p>
 
-<h3>Memory Card Matching</h3>
-<div id="memoryBoard"></div>
-<p id="memoryMessage" style="text-align:center;font-weight:bold;"></p>
+    <!-- Games Menu -->
+    <div id="gamesMenu" style="text-align:center; margin: 20px 0;">
+      <button class="start-btn" onclick="openGame('memory')">1️⃣ Memory Card Game</button>
+      <button class="start-btn" onclick="openGame('drawing')">2️⃣ Drawing Game</button>
+      <button class="start-btn" onclick="openGame('quizMC')">3️⃣ Quiz: Multiple Choice</button>
+      <button class="start-btn" onclick="openGame('quizTF')">4️⃣ Quiz: True/False</button>
+      <button class="start-btn" onclick="openGame('guess')">5️⃣ Number Guessing Game</button>
+    </div>
 
-<div class="quiz-container" style="max-width:400px; margin: 20px auto;">
-    <button class="start-btn" onclick="createMemoryBoard()">Restart Memory Game</button>
-</div>
+    <!-- Individual Game Sections -->
+    <div id="memoryGameSection" style="display:none;">
+      <h3>Memory Card Matching</h3>
+      <div id="memoryBoard"></div>
+      <p id="memoryMessage" style="text-align:center;font-weight:bold;"></p>
+      <div style="text-align:center; margin-top:10px;">
+        <button class="start-btn" onclick="createMemoryBoard()">Restart Memory Game</button>
+        <button class="start-btn" onclick="backToMenu()">Back to Games Menu</button>
+      </div>
+    </div>
 
-<h3>Quiz Game: Multiple Choice</h3>
-<div class="quiz-container" id="mcQuiz">
-    <button class="start-btn" id="startMCBtn" onclick="startMCQuiz()">Start Quiz</button>
-    <p id="mcQuestion"></p>
-    <div id="mcOptions"></div>
-    <p class="timer" id="mcTimer"></p>
-    <p style="text-align:center;">Score: <span id="mcScore">0</span></p>
-<button class="start-btn" onclick="restartMCQuiz()" style="margin-top:10px;">Restart Game</button>
-</div>
+    <div id="drawingGameSection" style="display:none;">
+      <h3>🎨 Drawing Game</h3>
+     <canvas id="gameDrawingCanvas" width="400" height="400"
+     style="border:2px solid #00ffff; border-radius:12px; display:block; margin:0 auto; background:#1f1f2e;"></canvas>
+      <div style="text-align:center; margin-top:10px;">
+        <button class="start-btn" onclick="resetDrawing()">Restart Drawing</button>
+        <button class="start-btn" onclick="backToMenu()">Back to Games Menu</button>
+        <div style="text-align:center; margin-bottom:10px;">
+  <label>Brush Color: 
+    <input type="color" id="gameBrushColor" value="#00ffff">
+          </label>
+        <label>Brush Size: 
+      <input type="range" id="gameBrushSize" min="1" max="20" value="5">
+    </label>
+      </div>
+    </div>
 
-<h3>Quiz Game: True/False</h3>
-<div class="quiz-container" id="tfQuiz">
-    <button class="start-btn" id="startTFBtn" onclick="startTFQuiz()">Start Quiz</button>
-    <p id="tfQuestion"></p>
-    <button onclick="answerTF(true)">True</button>
-    <button onclick="answerTF(false)">False</button>
-    <p class="timer" id="tfTimer"></p>
-    <p style="text-align:center;">Score: <span id="tfScore">0</span></p>
- <button class="start-btn" onclick="restartTFQuiz()" style="margin-top:10px;">Restart Game</button>
-</div>
 
-<h3>🎯 Number Guessing Game</h3>
-<div class="quiz-container" id="guessGame">
-    <p id="guessMessage">I'm thinking of a number between 1 and 100. Try to guess it!</p>
-    <input type="number" id="guessInput" placeholder="Enter your guess" style="padding:8px; width:60px;">
-    <button onclick="makeGuess()">Guess</button>
-    <p>Attempts: <span id="guessAttempts">0</span></p>
-    <button onclick="startGuessingGame()" style="margin-top:10px;">Restart Game</button>
+
+style="border:2px solid #00ffff; border-radius:12px; display:block; margin:0 auto; background:#1f1f2e;"></canvas>
+
+    <div id="mcQuizSection" style="display:none;">
+      <h3>Quiz Game: Multiple Choice</h3>
+      <div class="quiz-container" id="mcQuiz">
+        <button class="start-btn" id="startMCBtn" onclick="startMCQuiz()">Start Quiz</button>
+        <p id="mcQuestion"></p>
+        <div id="mcOptions"></div>
+        <p class="timer" id="mcTimer"></p>
+        <p style="text-align:center;">Score: <span id="mcScore">0</span></p>
+        <div style="text-align:center; margin-top:10px;">
+          <button class="start-btn" onclick="restartMCQuiz()">Restart Game</button>
+          <button class="start-btn" onclick="backToMenu()">Back to Games Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="tfQuizSection" style="display:none;">
+      <h3>Quiz Game: True/False</h3>
+      <div class="quiz-container" id="tfQuiz">
+        <button class="start-btn" id="startTFBtn" onclick="startTFQuiz()">Start Quiz</button>
+        <p id="tfQuestion"></p>
+        <button onclick="answerTF(true)">True</button>
+        <button onclick="answerTF(false)">False</button>
+        <p class="timer" id="tfTimer"></p>
+        <p style="text-align:center;">Score: <span id="tfScore">0</span></p>
+        <div style="text-align:center; margin-top:10px;">
+          <button class="start-btn" onclick="restartTFQuiz()">Restart Game</button>
+          <button class="start-btn" onclick="backToMenu()">Back to Games Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="guessGameSection" style="display:none;">
+      <h3>🎯 Number Guessing Game</h3>
+      <div class="quiz-container">
+        <p id="guessMessage">I'm thinking of a number between 1 and 100. Try to guess it!</p>
+        <input type="number" id="guessInput" placeholder="Enter your guess" style="padding:8px; width:60px;">
+        <button onclick="makeGuess()">Guess</button>
+        <p>Attempts: <span id="guessAttempts">0</span></p>
+        <div style="text-align:center; margin-top:10px;">
+          <button onclick="startGuessingGame()">Restart Game</button>
+          <button class="start-btn" onclick="backToMenu()">Back to Games Menu</button>
+        </div>
+      </div>
+    </div>
   </div>
-</div> 
-
+</div>
 
 
 <!----------------Marketing----------------------->
@@ -397,9 +562,37 @@ footer {
   </div>
 </div>
 
+
+<!----------------Drawing----------------------->
+<div id="drawing" class="section">
+  <h2>🎨 Mini Drawing Board</h2>
+  
+  <div style="text-align:center; margin-bottom:10px;">
+    <label>Brush Color: <input type="color" id="brushColor" value="#00ffff"></label>
+    <label>Brush Size: <input type="range" id="brushSize" min="1" max="20" value="5"></label>
+  </div>
+
+  <canvas id="drawingCanvas" width="400" height="400" 
+          style="border:2px solid #00ffff; border-radius:12px; display:block; margin:0 auto; background:#1f1f2e;"></canvas>
+  
+  <div style="text-align:center; margin-top:10px;">
+    <button onclick="clearCanvas()">Clear</button>
+    <button onclick="saveDrawing()">Save</button>
+    <button onclick="loadDrawing()">Load</button>
+  </div>
+</div>
+
 <!-- ---------------- CALENDAR ---------------- -->
 <div id="calendar" class="section">
 <h2>📅 Calendar</h2>
+
+<!-- 🔥 ADD BUTTONS HERE -->
+<div style="text-align:center; margin-bottom:10px;">
+    <button onclick="prevMonth()">⬅ Prev</button>
+    <button onclick="nextMonth()">Next ➡</button>
+</div>
+
+<!-- Calendar -->
 <div id="simpleCalendar"></div>
 </div>
 
@@ -407,7 +600,10 @@ footer {
 <div id="todo" class="section">
 <h2>✅ To-Do List</h2>
 <input type="text" id="taskInput" placeholder="Enter task">
+<input type="date" id="taskDate">
 <button onclick="addTask()">Add Task</button>
+<h3>📝 My Tasks</h3>
+<p id="emptyMsg">No tasks yet... 🚀</p>
 <ul id="taskList"></ul>
 </div>
 
@@ -417,7 +613,13 @@ footer {
   <div style="max-width:400px;margin:20px auto;text-align:center;">
     <input type="text" id="cityInput" placeholder="Enter city name" style="padding:10px;width:70%;border-radius:6px;border:none;">
     <button onclick="getWeather()" style="padding:10px 15px;margin-left:5px;border:none;border-radius:6px;background:#00ffff;color:#000;font-weight:bold;cursor:pointer;">Check</button>
-    <div id="weatherResult" style="margin-top:20px;font-size:16px;"></div>
+    <!-- UPDATED -->
+    <div id="weatherMain"></div>
+    <div id="weatherExtra"></div>
+
+    <!-- NEW -->
+    <div id="forecast"></div>
+
  </div>
 </div>  
 
@@ -481,11 +683,12 @@ window.onload = () => {
 
     const user = sessionStorage.getItem('loggedInUser');
     const welcome = document.getElementById('welcomeScreen');
+    
 
     if(user){
         welcome.style.display = 'none';
 
-        // ✅ show default section
+        // ✅ default section
         showSection('games');
 
         document.getElementById('userDisplay').textContent = "👤 " + user;
@@ -495,13 +698,23 @@ window.onload = () => {
 
         document.getElementById('bestTF').textContent =
             localStorage.getItem(user+"_tfScore") || 0;
+            const savedTheme = localStorage.getItem("theme");
+     if(savedTheme === "light"){
+         document.body.classList.add("light-mode");
+}
 
     } else {
         welcome.style.display = 'flex';
-       welcome.classList.add('show');
+        welcome.classList.add('show');
         switchTab('login');
     }
-};
+
+
+    // ✅ FIX: load calendar ALSO on page load
+    createCalendar();
+    renderTasks();
+    checkTodayTasks();
+}
 
 function createBubble(){
     if(!bubblesContainer || bubblesContainer.style.display === 'none') return;
@@ -714,6 +927,40 @@ function changePassword(){
     msg.textContent = "✅ Password updated!";
     document.getElementById('popupNewPassword').value = '';
 }
+function openGame(game) {
+    // Hide all sections first
+    const sections = ['memoryGameSection','drawingGameSection','mcQuizSection','tfQuizSection','guessGameSection'];
+    sections.forEach(sec => document.getElementById(sec).style.display = 'none');
+
+    // Show selected game
+    if(game === 'memory') document.getElementById('memoryGameSection').style.display = 'block';
+    else if(game === 'drawing'){
+    document.getElementById('drawingGameSection').style.display = 'block';
+
+    setTimeout(() => {
+        initGameDrawing();   // 🔥 THIS IS THE FIX
+    }, 100);
+}
+    else if(game === 'quizMC') document.getElementById('mcQuizSection').style.display = 'block';
+    else if(game === 'quizTF') document.getElementById('tfQuizSection').style.display = 'block';
+    else if(game === 'guess') document.getElementById('guessGameSection').style.display = 'block';
+
+    // Hide the menu
+    document.getElementById('gamesMenu').style.display = 'none';
+  }
+
+  function backToMenu() {
+    const sections = ['memoryGameSection','drawingGameSection','mcQuizSection','tfQuizSection','guessGameSection'];
+    sections.forEach(sec => document.getElementById(sec).style.display = 'none');
+    document.getElementById('gamesMenu').style.display = 'block';
+  }
+
+  // Placeholder for drawing reset
+function resetDrawing() {
+    if(gameCtx){
+        gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+    }
+}
 // ---------------- MEMORY CARD GAME ----------------   
 const memoryBoard = document.getElementById('memoryBoard');
 const memoryMessage = document.getElementById('memoryMessage');
@@ -751,35 +998,362 @@ createMemoryBoard();
 
 // ---------------- TO-DO LIST ----------------
 function addTask(){
-    let input=document.getElementById('taskInput');
-    let task=input.value;
-    if(!task) return;
-    let li=document.createElement('li');
-    let checkbox=document.createElement('input'); checkbox.type='checkbox';
-    li.appendChild(checkbox);
-    li.appendChild(document.createTextNode(' '+task));
-    document.getElementById('taskList').appendChild(li);
-    input.value='';
-}
+    let input = document.getElementById('taskInput');
+    let date = document.getElementById('taskDate').value;
+    let task = input.value.trim();
 
-// ---------------- CALENDAR ----------------
-function createCalendar(){
-    const calendarDiv=document.getElementById('simpleCalendar');
-    const now=new Date(); const year=now.getFullYear(); const month=now.getMonth();
-    const firstDay=new Date(year,month,1).getDay();
-    const lastDate=new Date(year,month+1,0).getDate();
-    let html=`<table border="1" cellpadding="5" cellspacing="0" style="margin:auto; text-align:center;">
-    <tr><th colspan="7">${now.toLocaleString('default',{month:'long'})} ${year}</th></tr>
-    <tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr><tr>`;
-    for(let i=0;i<firstDay;i++) html+='<td></td>';
-    for(let day=1;day<=lastDate;day++){
-        html+=`<td>${day}</td>`;
-        if((day+firstDay)%7===0) html+='</tr><tr>';
+    if(!task || !date){
+        alert("⚠️ Enter task and date");
+        return;
     }
-    html+='</tr></table>'; calendarDiv.innerHTML=html;
-}
-createCalendar();
 
+    let events = JSON.parse(localStorage.getItem("calendarEvents")) || {};
+
+    let d = new Date(date);
+    let key = `${d.getDate()}-${d.getMonth()+1}-${d.getFullYear()}`;
+
+    if(!events[key]) events[key] = [];
+    if(typeof events[key] === "string") events[key] = [events[key]];
+
+    events[key].push(task);
+
+    localStorage.setItem("calendarEvents", JSON.stringify(events));
+
+    input.value = '';
+    document.getElementById('taskDate').value = '';
+
+    renderTasks();
+    createCalendar();
+}
+
+function renderTasks(){
+    let taskList = document.getElementById('taskList');
+    taskList.innerHTML = '';
+
+    let events = JSON.parse(localStorage.getItem("calendarEvents")) || {};
+
+    Object.keys(events).forEach(date => {
+
+        let tasks = events[date];
+        if(typeof tasks === "string") tasks = [tasks];
+
+        tasks.forEach((task, index) => {
+
+            let li = document.createElement('li');
+
+            let checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+
+            checkbox.onchange = function(){
+                if(this.checked){
+                    li.style.textDecoration = "line-through";
+                    li.style.color = "#00ff99";
+                }
+            };
+
+            let taskDiv = document.createElement('div');
+            taskDiv.innerHTML = `
+             <span>📌 ${task}</span><br>
+             <small style="color:#ccc;">📅 ${date}</small>
+            `;
+            let delBtn = document.createElement('button');
+            delBtn.textContent = "❌";
+            delBtn.style.marginLeft = "10px";
+
+            delBtn.onclick = function(){
+                tasks.splice(index,1);
+
+                if(tasks.length === 0){
+                    delete events[date];
+                } else {
+                    events[date] = tasks;
+                }
+
+                localStorage.setItem("calendarEvents", JSON.stringify(events));
+                renderTasks();
+                createCalendar();
+            };
+
+            li.appendChild(checkbox);
+            li.appendChild(taskDiv);            
+            li.appendChild(delBtn);
+            taskList.appendChild(li);
+            let emptyMsg = document.getElementById("emptyMsg");
+
+        if(taskList.children.length === 0){
+         emptyMsg.style.display = "block";
+        } else {
+         emptyMsg.style.display = "none";
+            }       
+        });
+    });
+}
+// ---------------- CALENDAR ----------------
+let currentMonth = new Date();   // ✅ FIX ADDED HERE
+function createCalendar(){
+    const calendarDiv = document.getElementById('simpleCalendar');
+
+    const now = currentMonth;
+    const year = now.getFullYear();
+    const month = now.getMonth();
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const lastDate = new Date(year, month + 1, 0).getDate();
+
+    const marathiMonths = [
+        "जानेवारी","फेब्रुवारी","मार्च","एप्रिल","मे","जून",
+        "जुलै","ऑगस्ट","सप्टेंबर","ऑक्टोबर","नोव्हेंबर","डिसेंबर"
+    ];
+
+    const days = ["रवि","सोम","मंगळ","बुध","गुरु","शुक्र","शनि"];
+
+    const tithiList = [
+        "प्रतिपदा","द्वितीया","तृतीया","चतुर्थी","पंचमी",
+        "षष्ठी","सप्तमी","अष्टमी","नवमी","दशमी",
+        "एकादशी","द्वादशी","त्रयोदशी","चतुर्दशी","पूर्णिमा"
+    ];
+
+    let events = JSON.parse(localStorage.getItem("calendarEvents")) || {};
+
+    let html = `
+    <table style="width:100%;border-collapse:collapse;text-align:center;">
+    <tr style="background:#ffcc00;color:#000;">
+        <th colspan="7" style="padding:12px;font-size:20px;">
+            ${marathiMonths[month]} ${year}
+        </th>
+    </tr>
+    <tr style="background:#222;color:#fff;">
+        ${days.map(d => `<th>${d}</th>`).join("")}
+    </tr><tr>
+    `;
+
+    for(let i=0;i<firstDay;i++) html += "<td></td>";
+
+    for(let day=1; day<=lastDate; day++){
+
+        const tithi = tithiList[day % tithiList.length];
+
+        const festKey = `${day}-${month+1}`;
+        const fest = festivalData[festKey] || "";
+
+        const fullDate = `${day}-${month+1}-${year}`;
+        const userEvent = events[fullDate] || "";
+
+        const today = new Date();
+        const isToday = day === today.getDate() &&
+                        month === today.getMonth() &&
+                        year === today.getFullYear();
+
+        const hasEvent = userEvent ? true : false;
+
+        html += `
+        <td onclick="addEvent('${fullDate}')"
+            oncontextmenu="deleteEvent('${fullDate}'); return false;"
+            title="${userEvent}"
+            style="
+                border:1px solid #444;
+                padding:10px;
+                vertical-align:top;
+                cursor:pointer;
+                background:${isToday ? '#3a1f1f' : hasEvent ? '#1a3c34' : ''};
+            ">
+
+            <div style="font-size:20px;font-weight:bold;color:#ffcc00;">
+                ${day}
+            </div>
+
+            <div style="font-size:12px;color:#00ffff;">
+                ${tithi}
+            </div>
+
+            <div style="font-size:11px;color:#ff6b6b;">
+                ${fest}
+            </div>
+
+            <div style="font-size:11px;color:#00ff99;font-weight:bold;">
+                ${userEvent ? (Array.isArray(userEvent) 
+                ? userEvent.map(t => "📌 " + t).join("<br>") 
+                : "📌 " + userEvent) : ""}            </div>
+                 </td>
+                 `;
+
+        if((day + firstDay) % 7 === 0) html += "</tr><tr>";
+    }
+
+    html += "</tr></table>";
+    calendarDiv.innerHTML = html;
+}
+
+// ➕ ADD / EDIT EVENT
+function addEvent(date){
+ let events = JSON.parse(localStorage.getItem("calendarEvents")) || {};
+
+let userEvent = prompt("📅 Add Task:");
+
+if(userEvent){
+    if(!events[date]) events[date] = [];
+    if(typeof events[date] === "string") events[date] = [events[date]];
+
+    events[date].push(userEvent);
+
+    localStorage.setItem("calendarEvents", JSON.stringify(events));
+
+    renderTasks();   // sync to todo
+    createCalendar();
+}
+}
+// ❌ DELETE EVENT (RIGHT CLICK)
+function deleteEvent(date){
+    let events = JSON.parse(localStorage.getItem("calendarEvents")) || {};
+
+    if(events[date]){
+        if(confirm("Delete this event?")){
+            delete events[date];
+            localStorage.setItem("calendarEvents", JSON.stringify(events));
+            createCalendar();
+        }
+    }
+}
+
+// ⏩ NEXT / PREV
+function nextMonth(){
+    currentMonth.setMonth(currentMonth.getMonth() + 1);
+    createCalendar();
+}
+
+function prevMonth(){
+    currentMonth.setMonth(currentMonth.getMonth() - 1);
+    createCalendar();
+}
+
+const festivalData = {
+    "1-1": "नवीन वर्ष 🎉",
+    "14-1": "मकर संक्रांत 🪁",
+    "26-1": "प्रजासत्ताक दिन 🇮🇳",
+    "8-3": "महिला दिन 👩",
+    "25-3": "गुढी पाडवा 🪔",
+    "14-4": "डॉ. बाबासाहेब आंबेडकर जयंती",
+    "1-5": "महाराष्ट्र दिन",
+    "15-8": "स्वातंत्र्य दिन 🇮🇳",
+    "19-8": "रक्षाबंधन 🎁",
+    "7-9": "गणेश चतुर्थी 🪔",
+    "2-10": "गांधी जयंती",
+    "12-10": "दसरा 🏹",
+    "1-11": "दिवाळी 🪔",
+    "15-11": "भाऊबीज 👨‍👧",
+    "25-12": "ख्रिसमस 🎄"
+};
+
+function checkTodayTasks(){
+    let today = new Date();
+    let key = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`;
+
+    let events = JSON.parse(localStorage.getItem("calendarEvents")) || {};
+
+    if(events[key]){
+        let tasks = events[key];
+        if(typeof tasks === "string") tasks = [tasks];
+
+        alert("📌 Today's Tasks:\n\n" + tasks.join("\n"));
+    }
+}
+function toggleTheme(){
+    document.body.classList.toggle("light-mode");
+
+    const btn = event.target;
+
+    if(document.body.classList.contains("light-mode")){
+        localStorage.setItem("theme", "light");
+        btn.textContent = "🌞 Light";
+    } else {
+        localStorage.setItem("theme", "dark");
+        btn.textContent = "🌙 Dark";
+    }
+}
+let canvas, ctx, drawing = false;
+
+function initDrawingCanvas(){
+    canvas = document.getElementById('drawingCanvas');
+
+    if(!canvas) return;
+
+    ctx = canvas.getContext('2d');
+
+    // Mouse events
+    canvas.onmousedown = () => drawing = true;
+    canvas.onmouseup = () => drawing = false;
+    canvas.onmouseout = () => drawing = false;
+    canvas.onmousemove = draw;
+}
+function draw(e) {
+    if(!drawing) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const color = document.getElementById('brushColor').value;
+    const size = document.getElementById('brushSize').value;
+
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, Math.PI*2);
+    ctx.fill();
+}
+
+function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    localStorage.removeItem('savedDrawing');
+}
+
+function saveDrawing() {
+    const data = canvas.toDataURL();
+    localStorage.setItem('savedDrawing', data);
+    alert("✅ Drawing saved!");
+}
+
+function loadDrawing() {
+    const data = localStorage.getItem('savedDrawing');
+    if(data){
+        const img = new Image();
+        img.src = data;
+        img.onload = () => ctx.drawImage(img, 0, 0);
+    } else {
+        alert("⚠️ No saved drawing found");
+    }
+}
+let gameCanvas, gameCtx, gameDrawing = false;
+
+function initGameDrawing(){
+    gameCanvas = document.getElementById('gameDrawingCanvas');
+    if(!gameCanvas) return;
+
+    gameCtx = gameCanvas.getContext('2d');
+
+    gameCanvas.onmousedown = () => gameDrawing = true;
+    gameCanvas.onmouseup = () => gameDrawing = false;
+    gameCanvas.onmouseout = () => gameDrawing = false;
+
+    gameCanvas.onmousemove = function(e){
+        if(!gameDrawing) return;
+
+        const rect = gameCanvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const color = document.getElementById('gameBrushColor').value;
+        const size = document.getElementById('gameBrushSize').value;
+
+        gameCtx.fillStyle = color;
+        gameCtx.beginPath();
+        gameCtx.arc(x, y, size, 0, Math.PI*2);
+        gameCtx.fill();
+     };
+}
+function downloadDrawing(){
+  const link = document.createElement('a');
+  link.download = "drawing.png";
+  link.href = canvas.toDataURL();
+  link.click();
+}
 // ---------------- QUIZ GAME 1 (MULTIPLE CHOICE) ----------------
 const mcQuestions=[
     {q:"What is the capital of France?",options:["Paris","Berlin","London","Madrid"],answer:"Paris"},
@@ -982,28 +1556,44 @@ function getWeather(){
             return;
         }
     }
+
     const city = document.getElementById('cityInput').value.trim();
-    const resultDiv = document.getElementById('weatherResult');
-    if(!city){ resultDiv.innerHTML='❌ Please enter a city name'; return; }
+
+    if(!city){
+        alert("❌ Please enter a city name");
+        return;
+    }
+
     fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${weatherApiKey}&units=metric`)
-    .then(res=>res.json())
-    .then(data=>{
-        if(data.cod===200){
-            const temp = data.main.temp;
-            const desc = data.weather[0].description;
-            const humidity = data.main.humidity;
-            const wind = data.wind.speed;
-            resultDiv.innerHTML=`🌤 Weather in <b>${data.name}, ${data.sys.country}</b>:<br>
-            Temperature: <b>${temp}°C</b><br>
-            Condition: <b>${desc}</b><br>
-            Humidity: <b>${humidity}%</b><br>
-            Wind Speed: <b>${wind} m/s</b>`;
+    .then(res => res.json())
+    .then(data => {
+
+        if(data.cod === 200){
+
+            document.getElementById('weatherMain').innerHTML = `
+                <h2>${data.name}</h2>
+                <h1>${data.main.temp}°C</h1>
+                <p>${data.weather[0].description}</p>
+            `;
+
+            document.getElementById('weatherExtra').innerHTML = `
+                <p>💧 Humidity: ${data.main.humidity}%</p>
+                <p>🌬 Wind: ${data.wind.speed} m/s</p>
+            `;
+
+            // ✅ CALL FORECAST
+            getForecast(data.coord.lat, data.coord.lon);
+
         } else {
-            resultDiv.innerHTML=`❌ ${data.message}`;
+            alert("❌ City not found");
         }
+
     })
-    .catch(err=>{ console.error(err); resultDiv.innerHTML='❌ Error fetching data'; });
+    .catch(() => {
+        alert("❌ Error fetching weather");
+    });
 }
+
 function showSection(id){
     document.querySelectorAll('.section').forEach(sec=>{
         sec.classList.remove('active');
@@ -1013,7 +1603,94 @@ function showSection(id){
     if(active){
         active.classList.add('active');
     }
+
+    // ✅ FIX CALENDAR
+    if(id === "calendar"){
+        createCalendar();
+    }
+
+    // ✅ FIX WEATHER CHART
+    if(id === "weather" && window.weatherChart){
+        setTimeout(() => {
+            window.weatherChart.resize();
+        }, 300);
+    }
+    if(id === "drawing"){
+    setTimeout(() => {
+        initDrawingCanvas();
+    }, 100);
 }
+    // 🔥 IMPORTANT FIX FOR DRAWING BOARD
+    if(id === "drawing"){
+        setTimeout(() => {
+            const canvas = document.getElementById('drawingCanvas');
+            if(canvas){
+                canvas.width = canvas.width; // forces redraw
+            }
+        }, 100);
+    }
+}
+function getForecast(lat, lon){
+    fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${weatherApiKey}&units=metric`)
+    .then(res => res.json())
+    .then(data => {
+
+        if(!data.list || data.list.length === 0){
+            alert("❌ Forecast data not available");
+            return;
+        }
+
+        let labels = [];
+        let temps = [];
+
+        data.list.forEach((item, index) => {
+            if(index % 2 === 0){
+                labels.push(item.dt_txt.split(" ")[1].slice(0,5));
+                temps.push(item.main.temp);
+            }
+        });
+
+        drawChart(labels, temps);
+
+        // ✅ FIXED resize
+        setTimeout(() => {
+            if(window.weatherChart){
+                window.weatherChart.resize();
+            }
+        }, 300);
+
+        // ---------------- FORECAST ----------------
+        let days = {};
+        data.list.forEach(item => {
+            let date = item.dt_txt.split(" ")[0];
+            if(!days[date]){
+                days[date] = item;
+            }
+        });
+
+        showForecast(Object.values(days).slice(0,5));
+
+    });
+}
+function showForecast(days){
+    const container = document.getElementById("forecast");
+    container.innerHTML = "";
+
+    days.forEach(day => {
+        let date = day.dt_txt.split(" ")[0];
+        let temp = day.main.temp;
+        let icon = day.weather[0].icon;
+
+        container.innerHTML += `
+            <div class="day-card">
+                <p>${date}</p>
+                <img src="https://openweathermap.org/img/wn/${icon}@2x.png">
+                <p>${temp}°C</p>
+            </div>
+        `;
+    });
+}
+
 // ---------------- MARKETING LOGIC ----------------
 const generateBtn = document.getElementById('generateBtn');
 const createPPTBtn = document.getElementById('createPPTBtn');
@@ -1085,9 +1762,8 @@ createPPTBtn.onclick = () => {
 };
 
 async function scrapeWebsite(mode){
-    const url = document.getElementById('scraperUrl').value.trim();
     const resultDiv = document.getElementById('scraperResult');
-
+    const url = document.getElementById('scraperUrl').value.trim();
     if(!url){
         resultDiv.innerHTML = "❌ Please enter a URL";
         return;
