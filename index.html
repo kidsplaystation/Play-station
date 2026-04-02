@@ -436,12 +436,11 @@ h3 {
     <!-- Games Menu -->
     <div id="gamesMenu" style="text-align:center; margin: 20px 0;">
       <button class="start-btn" onclick="openGame('memory')">1️⃣ Memory Card Game</button>
-      <button class="start-btn" onclick="openGame('drawing')">2️⃣ Drawing Game</button>
-      <button class="start-btn" onclick="openGame('quizMC')">3️⃣ Quiz: Multiple Choice</button>
-      <button class="start-btn" onclick="openGame('quizTF')">4️⃣ Quiz: True/False</button>
-      <button class="start-btn" onclick="openGame('guess')">5️⃣ Number Guessing Game</button>
+      <button class="start-btn" onclick="openGame('quizMC')">2️⃣Quiz: Multiple Choice</button>
+      <button class="start-btn" onclick="openGame('quizTF')">3️⃣ Quiz: True/False</button>
+      <button class="start-btn" onclick="openGame('guess')">4️⃣ Number Guessing Game</button>
     </div>
-
+ 
     <!-- Individual Game Sections -->
     <div id="memoryGameSection" style="display:none;">
       <h3>Memory Card Matching</h3>
@@ -452,27 +451,6 @@ h3 {
         <button class="start-btn" onclick="backToMenu()">Back to Games Menu</button>
       </div>
     </div>
-
-    <div id="drawingGameSection" style="display:none;">
-      <h3>🎨 Drawing Game</h3>
-     <canvas id="gameDrawingCanvas" width="400" height="400"
-     style="border:2px solid #00ffff; border-radius:12px; display:block; margin:0 auto; background:#1f1f2e;"></canvas>
-      <div style="text-align:center; margin-top:10px;">
-        <button class="start-btn" onclick="resetDrawing()">Restart Drawing</button>
-        <button class="start-btn" onclick="backToMenu()">Back to Games Menu</button>
-        <div style="text-align:center; margin-bottom:10px;">
-  <label>Brush Color: 
-    <input type="color" id="gameBrushColor" value="#00ffff">
-          </label>
-        <label>Brush Size: 
-      <input type="range" id="gameBrushSize" min="1" max="20" value="5">
-    </label>
-      </div>
-    </div>
-
-
-
-style="border:2px solid #00ffff; border-radius:12px; display:block; margin:0 auto; background:#1f1f2e;"></canvas>
 
     <div id="mcQuizSection" style="display:none;">
       <h3>Quiz Game: Multiple Choice</h3>
@@ -577,8 +555,12 @@ style="border:2px solid #00ffff; border-radius:12px; display:block; margin:0 aut
   
   <div style="text-align:center; margin-top:10px;">
     <button onclick="clearCanvas()">Clear</button>
+    <button onclick="setEraser()">🧽 Eraser</button>
+    <button onclick="setBrush()">🖌 Brush</button>
     <button onclick="saveDrawing()">Save</button>
     <button onclick="loadDrawing()">Load</button>
+    <button onclick="setMode('circle')">⚪ Circle</button>
+    <button onclick="setMode('rect')">⬛ Rectangle</button>
   </div>
 </div>
 
@@ -929,18 +911,11 @@ function changePassword(){
 }
 function openGame(game) {
     // Hide all sections first
-    const sections = ['memoryGameSection','drawingGameSection','mcQuizSection','tfQuizSection','guessGameSection'];
-    sections.forEach(sec => document.getElementById(sec).style.display = 'none');
+    const sections = ['memoryGameSection','mcQuizSection','tfQuizSection','guessGameSection'];  
+      sections.forEach(sec => document.getElementById(sec).style.display = 'none');
 
     // Show selected game
     if(game === 'memory') document.getElementById('memoryGameSection').style.display = 'block';
-    else if(game === 'drawing'){
-    document.getElementById('drawingGameSection').style.display = 'block';
-
-    setTimeout(() => {
-        initGameDrawing();   // 🔥 THIS IS THE FIX
-    }, 100);
-}
     else if(game === 'quizMC') document.getElementById('mcQuizSection').style.display = 'block';
     else if(game === 'quizTF') document.getElementById('tfQuizSection').style.display = 'block';
     else if(game === 'guess') document.getElementById('guessGameSection').style.display = 'block';
@@ -1271,33 +1246,87 @@ function toggleTheme(){
     }
 }
 let canvas, ctx, drawing = false;
-
+let drawMode = "brush";
+let startX = 0;
+let startY = 0;
+let snapshot;
 function initDrawingCanvas(){
     canvas = document.getElementById('drawingCanvas');
-
     if(!canvas) return;
 
     ctx = canvas.getContext('2d');
 
-    // Mouse events
-    canvas.onmousedown = () => drawing = true;
-    canvas.onmouseup = () => drawing = false;
-    canvas.onmouseout = () => drawing = false;
-    canvas.onmousemove = draw;
+    canvas.onmousedown = function(e){
+        drawing = true;
+
+        const rect = canvas.getBoundingClientRect();
+        startX = e.clientX - rect.left;
+        startY = e.clientY - rect.top;
+
+        // ✅ FIX: snapshot MUST be here
+        snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    };
+
+    canvas.onmouseup = function(){
+        drawing = false;
+    };
+
+    canvas.onmouseout = function(){
+        drawing = false;
+    };
+
+    canvas.onmousemove = function(e){
+        draw(e);
+    };
 }
-function draw(e) {
+
+function draw(e){
     if(!drawing) return;
 
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    const color = document.getElementById('brushColor').value;
-    const size = document.getElementById('brushSize').value;
 
-    ctx.fillStyle = color;
+    let color = document.getElementById('brushColor').value;
+    let size = document.getElementById('brushSize').value;
+
+    // ✅ ERASER FIX
+    if(isEraser){
+        ctx.strokeStyle = "#1f1f2e"; // background color
+    } else {
+        ctx.strokeStyle = color;
+    }
+
+    ctx.lineWidth = size;
+    if(drawMode === "brush"){
+    ctx.lineWidth = size * 3;
+    ctx.lineCap = "round";
+
     ctx.beginPath();
-    ctx.arc(x, y, size, 0, Math.PI*2);
-    ctx.fill();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+
+    startX = x;
+    startY = y;
+}
+else {
+    ctx.putImageData(snapshot, 0, 0);
+
+    if(drawMode === "rect"){
+        ctx.strokeRect(startX, startY, x - startX, y - startY);
+    }
+
+    else if(drawMode === "circle"){
+        let radius = Math.sqrt(
+            Math.pow(x - startX, 2) + Math.pow(y - startY, 2)
+        );
+
+        ctx.beginPath();
+        ctx.arc(startX, startY, radius, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+}
 }
 
 function clearCanvas() {
@@ -1353,6 +1382,32 @@ function downloadDrawing(){
   link.download = "drawing.png";
   link.href = canvas.toDataURL();
   link.click();
+}
+function drawCircle(){
+    ctx.beginPath();
+    ctx.arc(200, 200, 50, 0, Math.PI*2);
+    ctx.strokeStyle = document.getElementById('brushColor').value;
+    ctx.stroke();
+}
+
+function drawRect(){
+    ctx.strokeStyle = document.getElementById('brushColor').value;
+    ctx.strokeRect(150, 150, 100, 100);
+}
+let isEraser = false;
+
+function setEraser(){
+    isEraser = true;
+    canvas.style.cursor = "not-allowed";
+}
+
+function setBrush(){
+    isEraser = false;
+    drawMode = "brush";
+    canvas.style.cursor = "crosshair";
+}
+function setMode(mode){
+    drawMode = mode;
 }
 // ---------------- QUIZ GAME 1 (MULTIPLE CHOICE) ----------------
 const mcQuestions=[
@@ -1618,8 +1673,14 @@ function showSection(id){
     if(id === "drawing"){
     setTimeout(() => {
         initDrawingCanvas();
+           const canvas = document.getElementById('drawingCanvas');
+        if(canvas){
+            const ctx = canvas.getContext("2d");    
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
     }, 100);
 }
+
     // 🔥 IMPORTANT FIX FOR DRAWING BOARD
     if(id === "drawing"){
         setTimeout(() => {
