@@ -924,11 +924,21 @@ function openGame(game) {
     document.getElementById('gamesMenu').style.display = 'none';
   }
 
-  function backToMenu() {
-    const sections = ['memoryGameSection','drawingGameSection','mcQuizSection','tfQuizSection','guessGameSection'];
-    sections.forEach(sec => document.getElementById(sec).style.display = 'none');
+ function backToMenu() {
+    const sections = [
+        'memoryGameSection',
+        'mcQuizSection',
+        'tfQuizSection',
+        'guessGameSection'
+    ];
+
+    sections.forEach(sec => {
+        const el = document.getElementById(sec);
+        if(el) el.style.display = 'none'; // ✅ safe check
+    });
+
     document.getElementById('gamesMenu').style.display = 'block';
-  }
+}
 
   // Placeholder for drawing reset
 function resetDrawing() {
